@@ -1,0 +1,42 @@
+---
+
+- name: download jenkins.repo
+  get_url:
+    url: http://pkg.jenkins-ci.org/redhat-stable/jenkins.repo
+    dest: /etc/yum.repos.d/jenkins.repo
+
+- name: import jenkins key
+  rpm_key:
+    key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+    state: present
+
+- name: install jenkins
+  package:
+    name: jenkins
+    state: present
+
+- name: start jenkins
+  systemd:
+    name: jenkins
+    state: started
+    enabled: yes
+
+- name: sleep for 5 seconds and continue with play
+  wait_for: timeout=5
+  delegate_to: localhost
+
+- name: Check jenkins is running for the first time
+  stat:
+    path: '/var/lib/jenkins/secrets/initialAdminPassword'
+  register: init_status
+
+- name: init password jenkin
+  shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+  when: init_status.stat.exists == True
+  changed_when: false
+  register: result
+
+- name: print init password jenkins
+  debug:
+    var: result.stdout
+  when: init_status.stat.exists == True

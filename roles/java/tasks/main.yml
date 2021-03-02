@@ -1,0 +1,6 @@
+---
+
+- name: Install Java 8 on Jenkins and Sonarqube hosts
+  package:
+    name: java-11-openjdk
+    state: present

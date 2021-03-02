@@ -1,0 +1,23 @@
+---
+
+- name: Add the inventory into /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{% set short_name = item.split('.') %}{{ hostvars[item]['ansible_facts']['eth1']['ipv4']['address'] }} {{item}} {{ short_name[0] }}"
+    state: present
+  with_items:
+    - "{{ groups['all'] }}"
+  when: hostvars[item]['ansible_facts']['eth1']['ipv4']['address'] is defined
+
+- name: Install yum utils
+  package:
+    name:
+      - yum-utils
+      - wget
+      - nano
+      - net-tools
+      - unzip
+      - zip
+    state: latest
+

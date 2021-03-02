@@ -1,0 +1,25 @@
+---
+- hosts: all
+  become: true
+  roles:
+    - base
+
+- hosts: docker
+  become: true
+  roles:
+    - docker
+
+- hosts: java
+  become: true
+  roles:
+    - java
+
+- hosts: jenkins
+  become: true
+  roles:
+    - jenkins
+
+- hosts: sonarqube
+  become: true
+  roles:
+    - sonarqube

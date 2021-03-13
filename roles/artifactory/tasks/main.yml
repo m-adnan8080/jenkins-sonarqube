@@ -1,0 +1,36 @@
+---
+
+- name: Add Jfrog Artifactory repo
+  get_url:
+    url: https://releases.jfrog.io/artifactory/artifactory-rpms/artifactory-rpms.repo
+    dest: /etc/yum.repos.d/jfrog-artifactory-rpms.repo
+
+- name: Install latest JFrog Artifactory Open Source
+  package:
+    name: jfrog-artifactory-oss
+    state: latest
+
+- name: Check Jfrog Systemd service installation status
+  stat:
+    path: '/etc/systemd/system/artifactory.service'
+  register: init_status
+
+- name: Install Jfrog Systemd service
+  command: /opt/jfrog/artifactory/app/bin/installService.sh
+  when: init_status.stat.exists == False
+
+- name: Enable at boot and Start Jforg artifactory service
+  service:
+    name: artifactory
+    state: started
+    enabled: yes
+
+- name: Open jfrog-artifactory-oss service on firewall
+  firewalld:
+    state: enabled
+    port: "{{ item }}"
+    permanent: yes
+  loop:
+    - 8081/tcp
+    - 8082/tcp
+  register: jfrog_ports_status

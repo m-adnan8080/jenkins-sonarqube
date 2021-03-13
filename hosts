@@ -14,3 +14,6 @@ appserver
 [java:children]
 jenkins
 sonarqube
+
+[all:vars]
+ansible_user=vagrant

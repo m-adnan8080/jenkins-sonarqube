@@ -7,7 +7,7 @@ pipeline {
     // mount jenkins_home/.m2 directory to docker /root/.m2 directory
     docker {
       image 'maven:3.6.3-openjdk-11'
-      label "maven_docker"
+      // label "maven_docker"
       args '-v $HOME/.m2:$USER/.m2'
     }
   }

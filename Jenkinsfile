@@ -19,7 +19,7 @@ pipeline {
       steps{
         script{
           withSonarQubeEnv('sonarserver'){
-            sh "mvn sonar:sonar"
+            sh "mvn install sonar:sonar"
           }
           timeout(time: 1, unit: 'HOURS'){
             def qg = waitForQualityGate()

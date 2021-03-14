@@ -1,7 +1,15 @@
 pipeline {
-  agent any
-  tools {
-    maven '3.6.3'
+  environment{
+    JAVA_TOOL_OPTIONS="-Duser.home=/var/maven"
+  }
+  agent
+  {
+    // To use maven inside docker container and also
+    // mount jenkins_home/.m2 directory to docker /root/.m2 directory
+    docker {
+      image 'maven:3.6.3-openjdk-8'
+      args '-v $HOME/.m2:/var/maven/.m2 -e MAVEN_CONFIG=/var/maven/.m2'
+    }
   }
 
   stages {
@@ -11,7 +19,7 @@ pipeline {
       steps{
         script{
           withSonarQubeEnv('sonarserver'){
-            sh "mvn -e sonar:sonar"
+            sh "mvn sonar:sonar"
           }
           timeout(time: 1, unit: 'HOURS'){
             def qg = waitForQualityGate()
@@ -29,7 +37,7 @@ pipeline {
     //   steps {
     //     sh 'mvn -version'
     //     sh 'mvn clean package'
-    //     // sh 'cp target/myproject-0.0.1-SNAPSHOT.jar $HOME/data/'
+    //     //sh 'cp target/myproject-0.0.1-SNAPSHOT.jar $HOME/data/'
     //   }
     // }
   }

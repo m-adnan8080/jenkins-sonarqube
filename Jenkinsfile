@@ -1,14 +1,13 @@
 pipeline {
   environment{
-    JAVA_TOOL_OPTIONS="-Duser.home=/var/maven"
+    JAVA_TOOL_OPTIONS="-Duser.home=/tmp"
   }
   agent
-  {
-    // To use maven inside docker container and also
+  { // To use maven inside docker container and also
     // mount jenkins_home/.m2 directory to docker /root/.m2 directory
     docker {
       image 'maven:3.6.3-openjdk-8'
-      args '-v $HOME/.m2:/var/maven/.m2 -e MAVEN_CONFIG=/var/maven/.m2 -e "SONAR_USER_HOME=/var/maven/.sonar'
+      args '-v $HOME/.m2:/tmp/.m2 -e MAVEN_CONFIG=/tmp/.m2'
     }
   }
 
@@ -19,7 +18,8 @@ pipeline {
       steps{
         script{
           withSonarQubeEnv('sonarserver'){
-            sh "mvn install sonar:sonar"
+            sh "mvn install"
+            sh "mvn sonar:sonar"
           }
           timeout(time: 1, unit: 'HOURS'){
             def qg = waitForQualityGate()
@@ -28,18 +28,10 @@ pipeline {
             }
           }
           sh 'mvn clean package'
-          // sh 'cp target/myproject-0.0.1-SNAPSHOT.jar $HOME/data/'
+          sh 'cp target/spring-boot-0.0.1-SNAPSHOT.jar $HOME/data/'
         }
       }
     }
-
-    // stage('Build') {
-    //   steps {
-    //     sh 'mvn -version'
-    //     sh 'mvn clean package'
-    //     //sh 'cp target/myproject-0.0.1-SNAPSHOT.jar $HOME/data/'
-    //   }
-    // }
   }
 
   post {

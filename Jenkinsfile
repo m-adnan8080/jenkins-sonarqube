@@ -7,7 +7,7 @@ pipeline {
     // mount jenkins_home/.m2 directory to docker /root/.m2 directory
     docker {
       image 'maven:3.6.3-openjdk-8'
-      args '-v $HOME/.m2:/tmp/.m2 -e MAVEN_CONFIG=/tmp/.m2'
+      args '-v $HOME/data:/tmp/data/ -v $HOME/.m2:/tmp/.m2 -e MAVEN_CONFIG=/tmp/.m2'
     }
   }
 
@@ -28,7 +28,7 @@ pipeline {
             }
           }
           sh 'mvn clean package'
-          sh 'cp target/spring-boot-0.0.1-SNAPSHOT.jar $HOME/data/'
+          sh 'cp target/spring-boot-0.0.1-SNAPSHOT.jar /tmp/data/myapp.jar'
         }
       }
     }

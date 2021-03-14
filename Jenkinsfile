@@ -7,19 +7,9 @@ pipeline {
     // mount jenkins_home/.m2 directory to docker /root/.m2 directory
     docker {
       image 'maven:3.6.3-openjdk-11'
-      label "maven_docker"
+      // label "maven_docker"
       args '-v $HOME/.m2:/root/.m2'
     }
-  }
-
-  // To use maven installed in jenkins configuration
-  // tools {
-  //   maven '3.6.3'
-  // }
-
-  // Add timestamp to pipeline steps
-  options {
-    timestamps ()
   }
 
   stages {

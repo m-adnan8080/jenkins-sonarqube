@@ -1,15 +1,5 @@
 pipeline {
-  environment{
-    JAVA_TOOL_OPTIONS="-Duser.home=/var/maven"
-  }
-  agent {
-    // To use maven inside docker container and also
-    // mount jenkins_home/.m2 directory to docker /root/.m2 directory
-    docker {
-      image 'maven:3.6.3-openjdk-8'
-      args '-v $HOME/.m2:/var/maven/.m2 -e MAVEN_CONFIG=/var/maven/.m2'
-    }
-  }
+  agent any
 
   stages {
 

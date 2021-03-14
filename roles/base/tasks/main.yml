@@ -19,5 +19,6 @@
       - net-tools
       - unzip
       - zip
+      - epel-release
     state: latest
 

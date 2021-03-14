@@ -2,7 +2,7 @@ pipeline {
   // environment{
   //   JAVA_TOOL_OPTIONS="-Duser=/root/.m2"
   // }
-  agent
+  agent {
     // To use maven inside docker container and also
     // mount jenkins_home/.m2 directory to docker /root/.m2 directory
     docker {
@@ -10,6 +10,7 @@ pipeline {
       label "maven_docker"
       args '-v $HOME/.m2:$USER/.m2'
     }
+  }
 
   // To use maven installed in jenkins configuration
   // tools {

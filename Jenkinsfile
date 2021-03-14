@@ -8,7 +8,7 @@ pipeline {
     docker {
       image 'maven:3.6.3-openjdk-11'
       // label "maven_docker"
-      args '-v $HOME/.m2:$USER/.m2'
+      args '-v $HOME/.m2:/home/$USER/.m2'
     }
   }
 

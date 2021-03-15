@@ -32,25 +32,50 @@ pipeline {
             }
           }
           sh 'mvn clean package'
-          sh 'cp target/spring-boot-0.0.1-SNAPSHOT.jar ~/data/spring-boot-0.0.1-SNAPSHOT.jar'
         }
       }
     }
 
+    // Publish maven package to Nexus Artifactory server
+    stage('Push maven package to Nexus Artifactory server'){
+      steps{
+        nexusPublisher nexusInstanceId: 'Nenus',
+        nexusRepositoryId: 'local-maven2-releases',
+        packages: [[
+          $class: 'MavenPackage',
+          mavenAssetList: [[
+            classifier: '',
+            extension: '',
+            filePath: '/var/lib/jenkins/workspace/test/target/spring-boot-0.0.1-SNAPSHOT.jar'
+          ]],
+          mavenCoordinate: [
+            artifactId: 'spring-boot',
+            groupId: 'com.example',
+            packaging: 'jar',
+            version: 'version-1.0'
+          ]
+        ]]
+      }
+    }
+
     // Build myapp.jar in Docker image
-    stage('Build Docker Container'){
+    stage('Build Docker Image from Maven package'){
       steps{
         sh 'docker build . -t spring-boot-sample-app:${DOCKER_TAG}'
+        sh 'docker tag spring-boot-sample-app:${DOCKER_TAG} 192.168.100.12:8000/spring-boot-sample-app:${DOCKER_TAG}'
       }
     }
 
-    // Save Docker image to file
-    stage('Save Docker image to file'){
+    // Push docker image to Nexus Docker repo
+    stage('Docker push image to Nexus Docker Repo'){
       steps{
-        sh 'docker save -o spring-boot-sample-app:${DOCKER_TAG}.tar.gz spring-boot-sample-app:${DOCKER_TAG}'
+        script{
+          withDockerRegistry(credentialsId: 'nexus-jenkins-user', url: 'http://192.168.100.12:8000/v1') {
+            sh 'docker push 192.168.100.12:8000/spring-boot-sample-app:${DOCKER_TAG}'
+          }
+        }
       }
     }
-
   }
 
   post {

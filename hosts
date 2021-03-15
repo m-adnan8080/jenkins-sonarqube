@@ -1,8 +1,8 @@
 [jenkins]
 jenkins.test ansible_host=192.168.100.11
 
-[sonarqube]
-sonarqube.test ansible_host=192.168.100.12
+[artifactory]
+nexus.test ansible_host=192.168.100.12
 
 [appserver]
 appserver.test ansible_host=192.168.100.13
@@ -10,10 +10,6 @@ appserver.test ansible_host=192.168.100.13
 [docker:children]
 jenkins
 appserver
-
-[java:children]
-jenkins
-sonarqube
 
 [all:vars]
 ansible_user=vagrant

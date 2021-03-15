@@ -24,7 +24,7 @@
   register: sonar_dir
 
 - name: Rename sonarqube-8.6.1
-  command: mv /opt/sonarqube-8.6.1.40680 /opt/sonarqube
+  command: ln -sf /opt/sonarqube-8.6.1.40680 /opt/sonarqube
   when: sonar_dir.stat.exists == False
 
 - name: Create sonar group
@@ -41,7 +41,7 @@
 
 - name: Set sonarqube directory onwership
   file:
-    path: /opt/sonarqube
+    path: /opt/sonarqube*
     state: directory
     recurse: yes
     owner: sonar

@@ -1,6 +1,0 @@
----
-
-- name: Install Java 11
-  package:
-    name: java-11-openjdk
-    state: present

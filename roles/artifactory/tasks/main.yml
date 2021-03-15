@@ -1,36 +1,133 @@
 ---
 
-- name: Add Jfrog Artifactory repo
-  get_url:
-    url: https://releases.jfrog.io/artifactory/artifactory-rpms/artifactory-rpms.repo
-    dest: /etc/yum.repos.d/jfrog-artifactory-rpms.repo
-
-- name: Install latest JFrog Artifactory Open Source
+- name: Install Java 8
   package:
-    name: jfrog-artifactory-oss
-    state: latest
+    name: java-1.8.0-openjdk
+    state: present
 
-- name: Check Jfrog Systemd service installation status
+- name: Check nexus tarball already downloaded
   stat:
-    path: '/etc/systemd/system/artifactory.service'
+    path: /opt/nexus-3.30.0-01-unix.tar.gz
+  register: nexus_zipfile
+
+- name: Download nexus tarball
+  get_url:
+    url: https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+    dest: /opt
+    mode: 0644
+  when: nexus_zipfile.stat.exists == False
+
+- name: Check nexus directory exists
+  stat:
+    path: /opt/nexus-3.30.0-01
+  register: nexus_dir
+
+- name: Uncompress nexus to /opt
+  unarchive:
+    src: /opt/nexus-3.30.0-01-unix.tar.gz
+    dest: /opt
+    remote_src: yes
+  when: nexus_dir.stat.exists == false
+
+- name: Set nexus directory
+  file:
+    src: /opt/nexus-3.30.0-01
+    dest: /opt /nexus
+    state: link
+
+- name: Create nexus group
+  group:
+    name: nexus
+    state: present
+    gid: 888
+
+- name: Create nexus user in group nexus
+  user:
+    name: nexus
+    create_home: no
+    group: nexus
+    state: present
+    uid: 888
+
+- name: Set nexus and nexus-data directory permissions
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: nexus
+    group: nexus
+    recurse: yes
+  loop:
+    - /opt/nexus
+    - /opt/sonatype-work
+
+- name: Config nexus user to run nexus service.
+  replace:
+    path: /opt/nexus/bin/nexus.rc
+    regexp: '#run_as_user=""'
+    replace: 'run_as_user="nexus"'
+
+- name: Config host ip in nexus config file.
+  replace:
+    path: /opt/nexus/etc/nexus-default.properties
+    regexp: '#aplication.host=127.0.0.1'
+    replace: 'aplication.host=0.0.0.0'
+
+- name: Config host ip in nexus config file.
+  lineinfile:
+    dest: /etc/security/limits.conf
+    line: 'nexus - nofile 65536'
+
+- name: Check nexus systemd service installation status
+  stat:
+    path: '/etc/systemd/system/nexus.service'
   register: init_status
 
-- name: Install Jfrog Systemd service
-  command: /opt/jfrog/artifactory/app/bin/installService.sh
+- name: Create nexus systemd service file.
+  blockinfile:
+    path: /etc/systemd/system/nexus.service
+    create: yes
+    block: |
+      [Unit]
+      Description=Nexus Service
+      After=syslog.target network.target
+
+      [Service]
+      Type=forking
+      LimitNOFILE=65536
+      ExecStart=/opt/nexus/bin/nexus start
+      ExecStop=/opt/nexus/bin/nexus stop
+      User=nexus
+      Group=nexus
+      Restart=on-failure
+
+      [Install]
+      WantedBy=multi-user.target
   when: init_status.stat.exists == False
 
-- name: Enable at boot and Start Jforg artifactory service
+- name: Enable at boot and start nexus service
   service:
-    name: artifactory
+    name: nexus
     state: started
     enabled: yes
 
-- name: Open jfrog-artifactory-oss service on firewall
-  firewalld:
-    state: enabled
-    port: "{{ item }}"
-    permanent: yes
-  loop:
-    - 8081/tcp
-    - 8082/tcp
-  register: jfrog_ports_status
+# - name: Open nexus port on firewall
+#   firewalld:
+#     state: enabled
+#     port: "8081/tcp"
+#     permanent: yes
+
+- name: Check nexus is running for the first time
+  stat:
+    path: '/opt/sonatype-work/nexus3/admin.password'
+  register: init_status
+
+- name: init password of nexus
+  shell: cat /opt/sonatype-work/nexus3/admin.password
+  when: init_status.stat.exists == True
+  changed_when: false
+  register: result
+
+- name: print init password nexus
+  debug:
+    var: result.stdout
+  when: init_status.stat.exists == True

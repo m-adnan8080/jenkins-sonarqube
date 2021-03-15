@@ -15,6 +15,7 @@
     name:
       - jenkins
       - ansible
+      - java-11-openjdk
     state: present
 
 - name: Start Jenkins

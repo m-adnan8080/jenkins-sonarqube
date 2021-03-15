@@ -9,18 +9,13 @@
   roles:
     - docker
 
-- hosts: java
-  become: true
-  roles:
-    - java
-
 - hosts: jenkins
   become: true
   roles:
     - jenkins
+    - sonarqube
 
-- hosts: sonarqube
+- hosts: artifactory
   become: true
   roles:
-    - sonarqube
     - artifactory

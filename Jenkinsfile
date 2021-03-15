@@ -1,14 +1,18 @@
+// Get dynamically git commit-id and use in code as docker image tags number
+def getVersion(){
+    def commitHash = sh label: '', returnStdout: true, script: 'git rev-parse --short HEAD'
+    return commitHash
+}
+
 pipeline {
+
   environment{
-    JAVA_TOOL_OPTIONS="-Duser.home=/tmp"
+    DOCKER_TAG = getVersion()
   }
-  agent
-  { // To use maven inside docker container and also
-    // mount jenkins_home/.m2 directory to docker /root/.m2 directory
-    docker {
-      image 'maven:3.6.3-openjdk-8'
-      args '-v $HOME/data:/tmp/data/ -v $HOME/.m2:/tmp/.m2 -e MAVEN_CONFIG=/tmp/.m2'
-    }
+
+  agent any
+  tools {
+    maven '3.6.3'
   }
 
   stages {
@@ -28,10 +32,25 @@ pipeline {
             }
           }
           sh 'mvn clean package'
-          sh 'cp target/spring-boot-0.0.1-SNAPSHOT.jar /tmp/data/myapp.jar'
+          sh 'cp target/spring-boot-0.0.1-SNAPSHOT.jar ~/data/spring-boot-0.0.1-SNAPSHOT.jar'
         }
       }
     }
+
+    // Build myapp.jar in Docker image
+    stage('Build Docker Container'){
+      steps{
+        sh 'docker build . -t spring-boot-sample-app:${DOCKER_TAG}'
+      }
+    }
+
+    // Save Docker image to file
+    stage('Save Docker image to file'){
+      steps{
+        sh 'docker save -o spring-boot-sample-app:${DOCKER_TAG}.tar.gz spring-boot-sample-app:${DOCKER_TAG}'
+      }
+    }
+
   }
 
   post {

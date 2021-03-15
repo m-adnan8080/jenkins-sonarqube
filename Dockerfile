@@ -1,10 +1,10 @@
 FROM openjdk
 
-ADD ./target/myproject-0.0.1-SNAPSHOT.jar /myproject-0.0.1-SNAPSHOT.jar
-ADD ./run.sh /run.sh
+WORKDIR /app
 
-RUN chmod a+x /run.sh
+ADD ./target/spring-boot-0.0.1-SNAPSHOT.jar /app/javaapp.jar
 
 EXPOSE 8000:8080
 
-CMD /run.sh
+ENTRYPOINT ["java", "-jar", "/app/javaapp.jar"]
+CMD [""]

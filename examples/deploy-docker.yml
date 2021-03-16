@@ -19,10 +19,16 @@
       pip:
         name: docker-py
         state: present
+    - name: Log into private registry and force re-authorization
+      docker_login:
+        registry_url: http://192.168.100.12:8000/v1
+        username: jenkins
+        password: jenkins
+        reauthorize: yes
     - name: Start the container
       docker_container:
-        name: hariapp
-        image: "kammana/hariapp:{{DOCKER_TAG}}"
+        name: spring-boot-app
+        image: "192.168.100.12:8000/spring-boot-sample-app:${DOCKER_TAG}"
         state: started
         published_ports:
           - 0.0.0.0:8080:8080

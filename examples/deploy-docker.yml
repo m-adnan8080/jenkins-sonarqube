@@ -25,6 +25,18 @@
         username: jenkins
         password: jenkins
         #reauthorize: yes
+
+    - name: Check any container already running with same name
+      docker_container_info:
+        name: spring-boot-app
+      register: result
+
+    - name: Remove already running container if exists
+      docker_container:
+        name: spring-boot-app
+        state: absent
+      when: result.exists
+
     - name: Start the container
       docker_container:
         name: spring-boot-app

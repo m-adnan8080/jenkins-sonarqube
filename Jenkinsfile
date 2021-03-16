@@ -52,7 +52,7 @@ pipeline {
             artifactId: 'spring-boot',
             groupId: 'com.example',
             packaging: 'jar',
-            version: 'version-${currentBuild.number}.0'
+            version: ("$currentBuild.number.0.0")
           ]
         ]]
       }

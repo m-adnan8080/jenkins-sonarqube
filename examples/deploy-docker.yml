@@ -24,11 +24,11 @@
         registry_url: http://192.168.100.12:8000/v1
         username: jenkins
         password: jenkins
-        reauthorize: yes
+        #reauthorize: yes
     - name: Start the container
       docker_container:
         name: spring-boot-app
-        image: "192.168.100.12:8000/spring-boot-sample-app:${DOCKER_TAG}"
+        image: "192.168.100.12:8000/spring-boot-sample-app:{{ DOCKER_TAG }}"
         state: started
         published_ports:
           - 0.0.0.0:8080:8080

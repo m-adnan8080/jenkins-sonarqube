@@ -80,7 +80,7 @@ pipeline {
     // Deploy docker image of remote server using Ansible playbook present in code directory
     stage('Docker Deploy'){
         steps{
-          ansiblePlaybook colorized: true, extras: 'DOCKER_TAG=${DOCKER_TAG}', installation: 'Ansible', inventory: 'examples/dev.inv', playbook: 'examples/deploy-docker.yml'
+          ansiblePlaybook colorized: true, extras: '-e DOCKER_TAG=${DOCKER_TAG}', installation: 'Ansible', inventory: 'examples/dev.inv', playbook: 'examples/deploy-docker.yml'
         }
     }
   }

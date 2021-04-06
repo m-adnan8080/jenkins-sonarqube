@@ -32,7 +32,7 @@
 - name: Set nexus directory
   file:
     src: /opt/nexus-3.30.0-01
-    dest: /opt /nexus
+    dest: /opt/nexus
     state: link
 
 - name: Create nexus group

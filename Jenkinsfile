@@ -78,7 +78,7 @@ pipeline {
     }
 
     // remove docker image from Jenkins server
-    stage('Build Docker Image from Maven package'){
+    stage('Remove Docker Images and container after push to Artifactory server'){
       steps{
         sh 'docker rm $(docker ps -a -q)'
         sh 'docker rmi -f spring-boot-sample-app:${DOCKER_TAG}'

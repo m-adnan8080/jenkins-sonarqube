@@ -82,6 +82,7 @@ pipeline {
       steps{
         sh 'docker container prune -f'
         sh 'docker rmi -f spring-boot-sample-app:${DOCKER_TAG}'
+        sh 'docker rmi -f 192.168.100.12:8000/spring-boot-sample-app:${DOCKER_TAG}'
         sh 'docker image prune -f'
       }
     }

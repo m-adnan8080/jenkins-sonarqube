@@ -77,6 +77,15 @@ pipeline {
       }
     }
 
+    // remove docker image from Jenkins server
+    stage('Build Docker Image from Maven package'){
+      steps{
+        sh 'docker rm $(docker ps -a -q)'
+        sh 'docker rmi -f spring-boot-sample-app:${DOCKER_TAG}'
+        sh 'docker image prune -f'
+      }
+    }
+
     // Deploy docker image of remote server using Ansible playbook present in code directory
     stage('Docker Deploy'){
         steps{
